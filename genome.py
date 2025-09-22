@@ -192,6 +192,13 @@ class Genome:
             
             num = random.randint(2, self.gene.size)
             self.gene.subTree(num, nodeIn)
+
+        if random.random() < self.chance and self.gene.size > 1:
+            chosenOperands = random.sample(Genome.__numbers, k = 2*len(self.variables)) 
+            nodeIn = self.__generate(chosenOperands)
+
+            num = random.randint(2, self.gene.size)
+            self.gene.subTree(num, nodeIn)
         
         self.__mutateNode()
 

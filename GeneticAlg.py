@@ -19,7 +19,7 @@ class GenProg:
         population (list[Genome]): Current population of genomes.
         bestFit (Genome | None): Best genome found after running `findSolution`.
     """
-    def __init__(self, test: list[list[Union[float, int, str]]], variables: list[str], populationSize: int = 10, elitism: int = 0, mutationChance: float = 0.05, epochs: int = 10) -> 'GenProg':
+    def __init__(self, test: list[list[Union[float, int, str]]], variables: list[str], populationSize: int = 10, elitism: int = 0, mutationChance: float = 0.05, epochs: int = 10, error: float = 10e-5) -> 'GenProg':
         """
         Initializes a GenProg instance with population parameters and variables.
 
@@ -47,6 +47,7 @@ class GenProg:
         self.__elitism = elitism
         self.__mutationChance = mutationChance
         self.__epochs = epochs
+        self.__error = error
 
         self.bestFit = None
         self.population = [Genome(self.__test, self.__variables, self.__mutationChance) for _ in range(self.__populationSize)]
@@ -77,7 +78,7 @@ class GenProg:
             graph.append(self.population[0].geneError)
 
             best_error = self.population[0].geneError
-            if best_error is not None and np.isfinite(best_error) and best_error < 1e-5:
+            if best_error is not None and np.isfinite(best_error) and best_error < self.__error:
                 break
             
             self.__newPopulation[:self.__elitism] = self.population[:self.__elitism]
