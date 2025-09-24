@@ -23,7 +23,7 @@ class Node:
         - An operator node combining one or two child nodes.
 
     Features:
-        - Supports unary operations: sin, cos, log
+        - Supports unary operations: sin, cos, log, exp
         - Supports binary operations: +, -, *, /, ** 
         - Handles both numeric constants and symbolic variables
         - Can evaluate expressions directly or with variable assignments
@@ -48,7 +48,7 @@ class Node:
     """
 
     __variableIndicator = "__nodeVar__"
-    __unaryOperations = ['sin', 'cos', 'log']
+    __unaryOperations = ['sin', 'cos', 'log', 'exp']
     __binaryOperations = ['+', '-', '*', '/', '**']
     
     def __init__(self, first: Union['Node', int, str], operation: str = None, second: Union['Node', int, str] = None) -> 'Node':
@@ -61,7 +61,7 @@ class Node:
                 - If 'operation' is provided, 'first' becomes the left child node.
             operation (str, optional): The operator for the node. Supported operators:
                 - Binary: '+', '-', '*', '/', '**'
-                - Unary: 'sin', 'cos', 'log'
+                - Unary: 'sin', 'cos', 'log', 'exp'
                 Defaults to None.
             second (Union[Node, int, str], optional): The second operand or right subtree.
                 Required if a binary operation is provided.

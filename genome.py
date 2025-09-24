@@ -53,12 +53,17 @@ class Genome:
         """
         if len(variables) == 0:
             raise AttributeError("List needs to have at least one variable!")
-        
+
         self.test = test
         self.variables = variables
         self.chance = chance
+
+        self.numbers = [1e-10 + n * random.random() if random.random() > self.chance 
+                        else n for n in Genome.__numbers[:-2]] + Genome.__numbers[-2:]
+        
         self.gene = self.__makeGene()
         self.geneError = None
+
     
     def __makeGene(self) -> 'Node':
         """
@@ -74,7 +79,8 @@ class Genome:
             return Node(self.variables[0])
 
         numOfconsts = random.randint(1, len(self.variables))
-        chosenOperands = self.variables + random.sample(Genome.__numbers, k = numOfconsts)
+        numbers = random.choices(self.numbers, k = numOfconsts)
+        chosenOperands = self.variables + numbers
         
         return self.__generate(chosenOperands)
 
@@ -102,9 +108,6 @@ class Genome:
                 return Node(givenList[0], op)
                 
             op = random.choice(opList[0])
-            if op == '/' and givenList[1] == 0:
-                givenList[1] = random.choice([1, 2, 3, 4, 5, 6, 7, 8, 9, m.pi, m.e])
-                
             return Node(givenList[0], op, givenList[1])
         
         if len(givenList) > 2:
@@ -143,7 +146,7 @@ class Genome:
                 self.geneError = float('inf')
                 return self.geneError
             try:
-                self.geneError += (values[i][-1] - self.test[i][-1])**2
+                self.geneError += (values[i][-1] - self.test[i][-1])**2   
             except(OverflowError):
                 self.geneError = float('inf')
         self.geneError /= (len(self.test)-1)
@@ -187,15 +190,16 @@ class Genome:
         
         if random.random() < self.chance and self.gene.size > 1:
             numOfconsts = random.randint(1, len(self.variables))
-            chosenOperands = self.variables + random.sample(Genome.__numbers, k = numOfconsts)
+            numbers = random.choices(self.numbers, k = numOfconsts)
+            chosenOperands = self.variables + numbers
             nodeIn = self.__generate(chosenOperands)
             
             num = random.randint(2, self.gene.size)
             self.gene.subTree(num, nodeIn)
 
         if random.random() < self.chance and self.gene.size > 1:
-            chosenOperands = random.sample(Genome.__numbers, k = 2*len(self.variables)) 
-            nodeIn = self.__generate(chosenOperands)
+            numbers = random.choices(self.numbers, k = len(Genome.__numbers))
+            nodeIn = self.__generate(numbers)
 
             num = random.randint(2, self.gene.size)
             self.gene.subTree(num, nodeIn)
@@ -219,7 +223,8 @@ class Genome:
             if random.random() < self.chance:
                 tree = self.gene.subTree(i)
                 if tree.op == 0:
-                    varOrNum = random.choices(population=[self.variables, Genome.__numbers], weights = [8, 1], k=1)[0]
+                    numbers = random.choices(self.numbers, k = len(Genome.__numbers))
+                    varOrNum = random.choices(population=[self.variables, self.numbers], weights = [8, 1], k=1)[0]
                     tree.setOperand(random.choice(varOrNum))
                 elif tree.op == 1:
                     operations = Node.getSupportedOperations()[1]
