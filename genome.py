@@ -228,7 +228,7 @@ class Genome:
                     tree.setOperand(random.choice(varOrNum))
                 elif tree.op == 1:
                     operations = Node.getSupportedOperations()[1]
-                    operations.remove(tree.getOperation()[2:])
+                    operations.remove(tree.getOperation())
                     tree.setOperation(random.choice(operations))
                 elif tree.op == 2:
                     operations = Node.getSupportedOperations()[0]

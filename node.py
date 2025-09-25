@@ -1,5 +1,5 @@
 import copy as cp
-import math as m
+import math
 from typing import Union
 
 # n - number of verices
@@ -50,6 +50,11 @@ class Node:
     __variableIndicator = "__nodeVar__"
     __unaryOperations = ['sin', 'cos', 'log', 'exp']
     __binaryOperations = ['+', '-', '*', '/', '**']
+
+    __mapUnary = {'sin' : lambda x: math.sin(x),
+                  'cos' : lambda x: math.cos(x), 
+                  'log' : lambda x: math.log(x), 
+                  'exp' : lambda x: math.exp(x)}
     
     def __init__(self, first: Union['Node', int, str], operation: str = None, second: Union['Node', int, str] = None) -> 'Node':
         """
@@ -92,7 +97,7 @@ class Node:
         self.value = None
         
         if self.op == 0:
-            self.__operand.append(str(first) if Node.__isNumber(first) else Node.__variableIndicator + str(first) + Node.__variableIndicator) 
+            self.__operand.append(first if Node.__isNumber(first) else Node.__variableIndicator + str(first) + Node.__variableIndicator) 
             self.valueCalc()
         elif self.op == 2:
             self.__operator = operation
@@ -104,7 +109,7 @@ class Node:
             self.size = 1 + left.size + right.size
             self.valueCalc()
         elif self.op == 1:
-            self.__operator = ('m.' + operation)
+            self.__operator = operation
             left = first if isinstance(first, Node) else Node(first)
             left.__parent = self
             self.__operand = [left]
@@ -155,7 +160,7 @@ class Node:
         elif self.op == 1:
             if newOperation not in Node.__unaryOperations:
                 raise AttributeError(f"Operation {newOperation} is not accepted!");
-            self.__operator = 'm.' + newOperation
+            self.__operator = newOperation
         elif self.op == 0:
             raise AttributeError("This node is a leaf, it has no operation!")
         
@@ -223,14 +228,14 @@ class Node:
         tree = self
         while True:
             if tree.op == 0:
-                tree.value = eval(str(tree.__operand[0])) if not tree.__isVariable() else None
-                tree.__leaves = {tree.value} if not tree.__isVariable() else {tree.__operand[0][11:-11]}
+                tree.value = tree.__operand[0] if not tree.__isVariable() else None
+                tree.__leaves = {tree.value} if tree.value is not None else {tree.__operand[0][11:-11]}
                 tree.size = 1
             elif tree.op == 2:
                 try:
                     leftVal = tree.__operand[0].value
                     rightVal = tree.__operand[1].value
-                    tree.value = eval(f"float('{leftVal}') {tree.__operator} float('{rightVal}')") if leftVal != None and rightVal != None else None
+                    tree.value = eval(f"{leftVal} {tree.__operator} {rightVal}") if leftVal != None and rightVal != None else None
                 except(ZeroDivisionError, ValueError, OverflowError):
                     #raise AttributeError("Division with 0 undefined behavior!")
                     tree.value = None
@@ -240,7 +245,7 @@ class Node:
             elif tree.op == 1:
                 try:
                     leftVal = tree.__operand[0].value
-                    tree.value = eval(f"{tree.__operator}(float('{leftVal}'))") if leftVal != None else None
+                    tree.value = Node.__mapUnary[tree.__operator](leftVal) if leftVal != None else None
                 except(ZeroDivisionError, ValueError, OverflowError):
                     #raise AttributeError("Log function can not take 0, undefined behavior!")
                     tree.value = None
@@ -302,20 +307,21 @@ class Node:
         Returns:
             list[float]: The computed values for each assignment, one per row in 'varVal'.
         """
+        if self.value is not None:
+            return [self.value] * n
+        
         if self.op == 0:
-            val = [n for n in varVal[str(self.__operand[0])]]
+            val = [num for num in varVal[self.__operand[0]]]
             return val
         elif self.op == 1:
             val = []
-            if self.__operand[0].value is None:
-                for n in self.__operand[0].__rCalcVar(varVal, n):
-                    try:
-                        compute = eval(f"{self.__operator}(float('{n}'))")
-                        val.append(compute)
-                    except(ZeroDivisionError, ValueError, OverflowError):
-                        val.append(None)
-                return val
-            return [self.__operand[0].value] * n
+            for num in self.__operand[0].__rCalcVar(varVal, n):
+                try:
+                    compute = Node.__mapUnary[self.__operator](num) if num is not None else None
+                    val.append(compute)
+                except(ZeroDivisionError, ValueError, OverflowError):
+                    val.append(None)
+            return val
         elif self.op == 2:
             val = []
             leftVal = self.__operand[0].__rCalcVar(varVal, n) if self.__operand[0].value is None else self.__operand[0].value
@@ -326,7 +332,7 @@ class Node:
             
             for l, r in zip(leftVal, rightVal):
                 try:
-                    compute = eval(f"float('{l}') {self.__operator} float('{r}')")
+                    compute = eval(f"{l} {self.__operator} {r}") if l is not None and r is not None else None
                     val.append(compute)
                 except(ZeroDivisionError, ValueError, OverflowError):
                     val.append(None)
@@ -392,7 +398,7 @@ class Node:
         if self.op == 0:
             return f"{self.__operand[0] if not self.__isVariable() else self.__operand[0][11:-11]}"
         elif self.op == 1:
-            return f"{self.__operator[2:]}({self.__operand[0]})"
+            return f"{self.__operator}({self.__operand[0]})"
         return f"({self.__operand[0]} {self.__operator} {self.__operand[1]})"
 
     def getSupportedOperations() -> (list[str], list[str]):
