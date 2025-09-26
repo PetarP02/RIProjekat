@@ -72,7 +72,7 @@ class GenProg:
 
             for i in range(self.__populationSize):
                 _ = self.population[i].getFitness()
-            
+
             self.population.sort()
 
             graph.append(self.population[0].geneError)

@@ -63,7 +63,6 @@ class Genome:
         
         self.gene = self.__makeGene()
         self.geneError = None
-
     
     def __makeGene(self) -> 'Node':
         """

@@ -1,5 +1,6 @@
 import copy as cp
 import math
+from fractions import Fraction
 from typing import Union
 
 # n - number of verices
@@ -55,6 +56,14 @@ class Node:
                   'cos' : lambda x: math.cos(x), 
                   'log' : lambda x: math.log(x), 
                   'exp' : lambda x: math.exp(x)}
+    __mapBinary = {'+' : lambda x, y: (x) + (y), 
+                   '-' : lambda x, y: (x) - (y), 
+                   '*' : lambda x, y: (x) * (y), 
+                   '/' : lambda x, y: (x) / (y), 
+                   '**' : lambda x, y: (math.copysign(abs(x**y), x)
+                                        if x >= 0 or Fraction(y).limit_denominator().denominator%2 != 0
+                                        else (_ for _ in ()).throw(ValueError))}
+                   # lambda x, y: x**y if not (isinstance(y, float) and x < 0) else None
     
     def __init__(self, first: Union['Node', int, str], operation: str = None, second: Union['Node', int, str] = None) -> 'Node':
         """
@@ -90,31 +99,28 @@ class Node:
             self.op = 0
 
         self.__parent = None
-        self.__operator = None
+        self.__operator = operation
         self.__operand = []
         self.__leaves = set()
-        self.size = 1
         self.value = None
         
         if self.op == 0:
             self.__operand.append(first if Node.__isNumber(first) else Node.__variableIndicator + str(first) + Node.__variableIndicator) 
-            self.valueCalc()
+            self.size = 1
         elif self.op == 2:
-            self.__operator = operation
             left = first if isinstance(first, Node) else Node(first)
             right = second if isinstance(second, Node) else Node(second)
             left.__parent = self
             right.__parent = self
             self.__operand = [left, right]
             self.size = 1 + left.size + right.size
-            self.valueCalc()
         elif self.op == 1:
-            self.__operator = operation
             left = first if isinstance(first, Node) else Node(first)
             left.__parent = self
             self.__operand = [left]
             self.size = 1 + left.size
-            self.valueCalc()
+            
+        self.valueCalc()
 
     def __isNumber(var: Union[str, float, int]) -> bool:
         """
@@ -235,7 +241,8 @@ class Node:
                 try:
                     leftVal = tree.__operand[0].value
                     rightVal = tree.__operand[1].value
-                    tree.value = eval(f"{leftVal} {tree.__operator} {rightVal}") if leftVal != None and rightVal != None else None
+                    #tree.value = eval(f"{leftVal} {tree.__operator} {rightVal}") if leftVal != None and rightVal != None else None
+                    tree.value = Node.__mapBinary[tree.__operator](leftVal, rightVal) if leftVal != None and rightVal != None else None
                 except(ZeroDivisionError, ValueError, OverflowError):
                     #raise AttributeError("Division with 0 undefined behavior!")
                     tree.value = None
@@ -332,7 +339,8 @@ class Node:
             
             for l, r in zip(leftVal, rightVal):
                 try:
-                    compute = eval(f"{l} {self.__operator} {r}") if l is not None and r is not None else None
+                    #compute = eval(f"{l} {self.__operator} {r}") if l is not None and r is not None else None
+                    compute = Node.__mapBinary[self.__operator](l, r) if l != None and r != None else None
                     val.append(compute)
                 except(ZeroDivisionError, ValueError, OverflowError):
                     val.append(None)
