@@ -36,7 +36,7 @@ class Genome:
         __lt__(other): Defines comparison based on genome fitness and expression value. 
     """
     
-    __numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, m.pi, m.e]
+    __numbers = [m.pi, m.e]
     
     def __init__(self, test: list[list[float]], variables: list[str], chance: float = 0.05):
         """
@@ -58,9 +58,9 @@ class Genome:
         self.variables = variables
         self.chance = chance
 
-        self.numbers = [1e-10 + n * random.random() if random.random() > self.chance 
-                        else n for n in Genome.__numbers[:-2]] + Genome.__numbers[-2:]
-        
+        self.numbers = [1e-10 + random.random() if random.random() > self.chance 
+                        else _ for _ in range(10)] + Genome.__numbers
+
         self.gene = self.__makeGene()
         self.geneError = None
     
@@ -188,23 +188,30 @@ class Genome:
         """
         
         if random.random() < self.chance and self.gene.size > 1:
-            numOfconsts = random.randint(1, len(self.variables))
-            numbers = random.choices(self.numbers, k = numOfconsts)
-            chosenOperands = self.variables + numbers
-            nodeIn = self.__generate(chosenOperands)
-            
-            num = random.randint(2, self.gene.size)
-            self.gene.subTree(num, nodeIn)
+            self.__growMutateVN()
 
         if random.random() < self.chance and self.gene.size > 1:
-            numbers = random.choices(self.numbers, k = len(Genome.__numbers))
-            nodeIn = self.__generate(numbers)
-
-            num = random.randint(2, self.gene.size)
-            self.gene.subTree(num, nodeIn)
+            self.__growMutateN()
         
         self.__mutateNode()
 
+    def __growMutateVN(self) -> None:
+        numOfconsts = random.randint(1, len(self.variables))
+        numbers = random.choices(self.numbers, k = numOfconsts)
+        chosenOperands = self.variables + numbers
+        nodeIn = self.__generate(chosenOperands)
+        
+        num = random.randint(1, self.gene.size)
+        self.gene.subTree(num, nodeIn)
+
+    def __growMutateN(self) -> None:
+        numOfconsts = random.randint(1, len(self.numbers))
+        numbers = random.choices(self.numbers, k = numOfconsts)
+        nodeIn = self.__generate(numbers)
+
+        num = random.randint(2, self.gene.size)
+        self.gene.subTree(num, nodeIn)
+    
     def __mutateNode(self) -> None:
         """
         Mutates individual nodes within the binary expression tree.
@@ -222,7 +229,7 @@ class Genome:
             if random.random() < self.chance:
                 tree = self.gene.subTree(i)
                 if tree.op == 0:
-                    numbers = random.choices(self.numbers, k = len(Genome.__numbers))
+                    numbers = random.choices(self.numbers, k = len(self.numbers))
                     varOrNum = random.choices(population=[self.variables, self.numbers], weights = [8, 1], k=1)[0]
                     tree.setOperand(random.choice(varOrNum))
                 elif tree.op == 1:
