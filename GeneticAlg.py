@@ -19,7 +19,7 @@ class GenProg:
         population (list[Genome]): Current population of genomes.
         bestFit (Genome | None): Best genome found after running `findSolution`.
     """
-    def __init__(self, test: list[list[Union[float, int, str]]], variables: list[str], populationSize: int = 10, elitism: int = 0, mutationChance: float = 0.05, epochs: int = 10, error: float = 10e-5) -> 'GenProg':
+    def __init__(self, test: list[list[Union[float, int, str]]], variables: list[str], populationSize: int = 10, treeDepth: int = 3, elitism: int = 0, mutationChance: float = 0.05, epochs: int = 10, error: float = 10e-5) -> 'GenProg':
         """
         Initializes a GenProg instance with population parameters and variables.
 
@@ -48,10 +48,11 @@ class GenProg:
         self.__mutationChance = mutationChance
         self.__epochs = epochs
         self.__error = error
+        self.__treeDepth = treeDepth
 
         self.bestFit = None
-        self.population = [Genome(self.__test, self.__variables, self.__mutationChance) for _ in range(self.__populationSize)]
-        self.__newPopulation = [Genome(self.__test, self.__variables, self.__mutationChance) for _ in range(self.__populationSize)]
+        self.population = [Genome(self.__test, self.__variables, self.__treeDepth + len(self.__variables), self.__mutationChance) for _ in range(self.__populationSize)]
+        self.__newPopulation = [Genome(self.__test, self.__variables, self.__treeDepth + len(self.__variables), self.__mutationChance) for _ in range(self.__populationSize)]
 
     def findSolution(self) -> list:
         """
@@ -95,7 +96,7 @@ class GenProg:
             
         best = min(self.population)
         self.bestFit = cp.deepcopy(best)
-        print(f"elapse time : {time.perf_counter() - startintTime : .6f} s - solution: {best} - value: {best.gene.value} - fitness: {best.geneError}")
+        print(f"elapse time : {time.perf_counter() - startintTime : .6f} s \nsolution: {best} \nfitness: {best.geneError}")
         return graph
     
     def crossover(self, genome1: 'Genome', genome2: 'Genome') -> list:

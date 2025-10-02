@@ -38,7 +38,7 @@ class Genome:
     
     __numbers = [m.pi, m.e]
     
-    def __init__(self, test: list[list[float]], variables: list[str], chance: float = 0.05):
+    def __init__(self, test: list[list[float]], variables: list[str], treeDepth: int, chance: float = 0.05):
         """
         Initializes a Genome instance with a matrix where every row containg all values for variables and target goal for respective row,
         list of variables, and a mutation chance.
@@ -51,15 +51,19 @@ class Genome:
         Raises:
             AttributeError: If the `numbers` list is empty.
         """
+        if treeDepth < len(variables):
+            raise AttributeError(f"Tree needs to have variables! Tree depth is set : {treeDepth} but there is {len(variables)} variables!")
+        
         if len(variables) == 0:
             raise AttributeError("List needs to have at least one variable!")
 
         self.test = test
         self.variables = variables
         self.chance = chance
+        self.treeDepth = treeDepth
 
         self.numbers = [1e-10 + random.random() if random.random() > self.chance 
-                        else _ for _ in range(10)] + Genome.__numbers
+                        else _ for _ in range(self.treeDepth)] + Genome.__numbers
 
         self.gene = self.__makeGene()
         self.geneError = None
@@ -164,7 +168,7 @@ class Genome:
         Returns:
             bool: True if the genome is valid, False otherwise.
         """
-        if self.gene.size > 2*(2*len(self.variables) + 2*len(self.variables)) - 1:
+        if self.gene.size > 2*(self.treeDepth) - 1:
             return False
             
         try:
