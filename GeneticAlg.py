@@ -119,6 +119,9 @@ class GenProg:
         tree2 = child2.gene.subTree(node2)
         _ = child1.gene.subTree(node1, cp.deepcopy(tree2))#zameni podstablo na poziciji node1 sa podstablom tree2
         _ = child2.gene.subTree(node2, cp.deepcopy(tree1))#uzmi stablo na poziciji node2
+
+        child1.reEvalNumTerms()
+        child2.reEvalNumTerms()
         
         return [child1, child2]
         

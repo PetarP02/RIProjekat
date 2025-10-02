@@ -174,7 +174,17 @@ class Genome:
             return True
         except (ValueError):
             return False
-    
+
+    def reEvalNumTerms(self):
+        leaves = self.gene.getLeaves()
+        for l in leaves:
+            try: 
+                n = float(l)
+                if n not in self.numbers:
+                    numbers.append(n)
+            except:
+                continue
+                
     def mutate(self):
         """
         Applies mutation to the genome, modifying its expression tree.
