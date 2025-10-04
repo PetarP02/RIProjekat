@@ -51,8 +51,8 @@ class GenProg:
         self.__treeDepth = treeDepth
 
         self.bestFit = None
-        self.population = [Genome(self.__test, self.__variables, self.__treeDepth + len(self.__variables), self.__mutationChance) for _ in range(self.__populationSize)]
-        self.__newPopulation = [Genome(self.__test, self.__variables, self.__treeDepth + len(self.__variables), self.__mutationChance) for _ in range(self.__populationSize)]
+        self.population = [Genome(self.__test, self.__variables, self.__treeDepth, self.__mutationChance) for _ in range(self.__populationSize)]
+        self.__newPopulation = [Genome(self.__test, self.__variables, self.__treeDepth, self.__mutationChance) for _ in range(self.__populationSize)]
 
     def findSolution(self) -> list:
         """
@@ -93,6 +93,9 @@ class GenProg:
                 self.__newPopulation[j+1].mutate()
             
             self.population = self.__newPopulation
+
+        for i in range(self.__populationSize):
+                _ = self.population[i].getFitness()
             
         best = min(self.population)
         self.bestFit = cp.deepcopy(best)

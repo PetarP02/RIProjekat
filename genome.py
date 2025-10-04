@@ -51,7 +51,7 @@ class Genome:
         Raises:
             AttributeError: If the `numbers` list is empty.
         """
-        if treeDepth < len(variables):
+        if 2**(treeDepth-1) < len(variables):
             raise AttributeError(f"Tree needs to have variables! Tree depth is set : {treeDepth} but there is {len(variables)} variables!")
         
         if len(variables) == 0:
@@ -168,7 +168,7 @@ class Genome:
         Returns:
             bool: True if the genome is valid, False otherwise.
         """
-        if self.gene.size > 2*(self.treeDepth) - 1:
+        if self.gene.size > 2**(self.treeDepth) - 1:
             return False
             
         try:
